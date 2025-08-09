@@ -19,9 +19,13 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack >
-        <Stack.Screen name="index"  options={{ headerShown: false }}/>
-        <Stack.Screen name="HomePage" options={{ headerShown: false }}/>
+      <Stack>
+        {/* Redirect entry will send to /(tabs) */}
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        {/* Register the tabs segment so it can render the bottom tabs */}
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        {/* Phone login screen */}
+        <Stack.Screen name="Login" options={{ headerShown: true, title: 'تسجيل الدخول' }} />
       </Stack>
       <StatusBar style="dark" />
     </ThemeProvider>

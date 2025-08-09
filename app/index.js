@@ -1,11 +1,7 @@
-import React from 'react'
-import { StyleSheet } from 'react-native'
-import HomePage from './HomePage'
+import React from 'react';
+import { Redirect } from 'expo-router';
 
-const index = () => {
-  return <HomePage />
+export default function Index() {
+  // On app start, go to the tab navigator
+  return <Redirect href="/(tabs)" />;
 }
-
-export default index
-
-const styles = StyleSheet.create({})
