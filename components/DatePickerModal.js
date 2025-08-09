@@ -6,16 +6,13 @@ export default function DatePickerModal({ isVisible, onCancel, onConfirm }) {
 
   return (
     <DateTimePickerModal
-      isVisible={isVisible}
-      mode="date"
-      date={date}
-      onConfirm={selectedDate => {
-        setDate(selectedDate);
-        onConfirm(selectedDate);
-      }}
-      onCancel={onCancel}
-      locale="ar"
-      display="spinner"
-    />
+  isVisible={isDatePickerVisible}
+  mode="date"
+  onConfirm={handleConfirm}
+  onCancel={hideDatePicker}
+  locale="ar"
+  value={selectedDate || new Date()}
+/>
+
   );
 }
