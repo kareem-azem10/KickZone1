@@ -1,4 +1,3 @@
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { useNavigation } from 'expo-router';
 import {
   addDoc,
@@ -15,6 +14,7 @@ import {
   Alert,
   Dimensions,
   Image,
+  Linking,
   Modal,
   SafeAreaView,
   ScrollView,
@@ -24,9 +24,9 @@ import {
   ToastAndroid,
   TouchableOpacity,
   View,
-  Linking,
 } from 'react-native';
 import ImageViewer from 'react-native-image-zoom-viewer';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import MaterialDesignIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { db } from '../Confige';
 import { strings } from '../Strings';
@@ -340,10 +340,12 @@ const HomeScreen = () => {
               ]}
               disabled={isDatePickerButtonDisabled}
             >
+              <MaterialDesignIcons name="calendar-plus" size={22} color="#fff" style={styles.buttonIcon} />
               <Text style={styles.buttonText}>حجز موعد جديد</Text>
             </TouchableOpacity>
   
             <TouchableOpacity onPress={handleCurrentReservation} style={styles.blueButton}>
+              <MaterialDesignIcons name="calendar-clock" size={22} color="#fff" style={styles.buttonIcon} />
               <Text style={styles.buttonText}>الحجز الحالي</Text>
             </TouchableOpacity>
   
@@ -354,6 +356,7 @@ const HomeScreen = () => {
               }}
               style={[styles.blueButton, { marginTop: 10 }]}
             >
+              <MaterialDesignIcons name="arrow-right" size={22} color="#fff" style={styles.buttonIcon} />
               <Text style={styles.buttonText}>رجوع</Text>
             </TouchableOpacity>
   
@@ -372,7 +375,7 @@ const HomeScreen = () => {
             <Modal visible={showHourModal} transparent animationType="slide">
               <View style={styles.modalOverlay}>
                 <View style={styles.reservationModalBox}>
-                  <Text style={styles.reservationTitle}>اختر ساعة البداية</Text>
+                  <Text style={styles.hourTitleRed}>اختر ساعة البداية</Text>
                   {[14, 16, 18, 20, 22].map((hour, idx) => {
                     const label = `${hour}:00 - ${hour + 2 === 24 ? '00' : hour + 2 + ':00'}`;
                     return (
@@ -383,9 +386,11 @@ const HomeScreen = () => {
                           setShowHourModal(false);
                           setShowNameModal(true); // ✅ فتح مودال الاسم بعد اختيار الساعة
                         }}
-                        style={styles.hourButton}
+                        style={styles.hourOptionRow}
+                        activeOpacity={0.6}
                       >
-                        <Text style={styles.hourText}>{label}</Text>
+                        <Text style={styles.hourOptionText}>{label}</Text>
+                        <View style={styles.hourOptionUnderline} />
                       </TouchableOpacity>
                     );
                   })}
@@ -421,16 +426,17 @@ const HomeScreen = () => {
                       </Text>
                       <TouchableOpacity
                         onPress={handleCloseAll}
-                        style={[styles.blueButton, { marginTop: 20 }]}
+                        style={styles.screenshotCloseButton}
+                        activeOpacity={0.8}
                       >
-                        <Text style={styles.buttonText}>إغلاق</Text>
+                        <Text style={styles.screenshotCloseButtonText}>إغلاق</Text>
                       </TouchableOpacity>
                     </View>
                   ) : !reservationConfirmed ? (
                     <>
                       <Text style={styles.reservationTitle}>ادخل اسم صاحب الحجز</Text>
                       <TextInput
-                        placeholder="اسم صاحب الحجز"
+                        placeholder="اسم صاحب الحجز (الاسم مع اسم العائله)"
                         value={reservationName}
                         onChangeText={setReservationName}
                         style={styles.input}
@@ -452,28 +458,33 @@ const HomeScreen = () => {
                       </TouchableOpacity>
                     </>
                   ) : (
-                    <View style={{ alignItems: 'center' }}>
-                      <Text style={{ fontSize: 20, color: 'green', fontWeight: 'bold', marginBottom: 12 }}>
-                        تم الحجز بنجاح!
-                      </Text>
-                      <Text style={styles.resultText}>
-                        التاريخ: {selectedDate?.toLocaleDateString()}
-                      </Text>
-                      <Text style={styles.resultText}>
-                        الساعة: {`${selectedHour}:00 - ${selectedHour + 2 === 24 ? '00' : selectedHour + 2 + ':00'
-                          }`}
-                      </Text>
-                      <Text style={styles.resultText}>الاسم: {reservationName}</Text>
-                      <Text style={[styles.resultText, { fontWeight: 'bold' }]}>
-                        رقم الحجز: {reservationNumber}
-                      </Text>
-                      <TouchableOpacity
-                        onPress={handleCloseAll}
-                        style={[styles.blueButton, { marginTop: 20 }]}
-                      >
-                        <Text style={styles.buttonText}>إغلاق</Text>
-                      </TouchableOpacity>
-                    </View>
+                    <React.Fragment>
+                      {/* confirmation */}
+                      <View style={{ alignItems: 'center' }}>
+                       <Text style={{ fontSize: 20, color: 'green', fontWeight: 'bold', marginBottom: 12 }}>
+                         تم الحجز بنجاح!
+                       </Text>
+                       <Text style={styles.resultText}>
+                         التاريخ: {selectedDate?.toLocaleDateString()}
+                       </Text>
+                       <Text style={styles.resultText}>
+                         الساعة: {`${selectedHour}:00 - ${selectedHour + 2 === 24 ? '00' : selectedHour + 2 + ':00'
+                           }`}
+                       </Text>
+                       <Text style={styles.resultText}>الاسم: {reservationName}</Text>
+                       <Text style={[styles.resultText, { fontWeight: 'bold' }]}>
+                         رقم الحجز: {reservationNumber}
+                       </Text>
+                       <Text style={styles.screenshotNote}>{`⚠️ ارجو اخذ لقطه للشاشه (Screenshot) كإثبات للحجز`}</Text>
+                       <TouchableOpacity
+                         onPress={handleCloseAll}
+                         style={styles.screenshotCloseButton}
+                         activeOpacity={0.8}
+                       >
+                         <Text style={styles.screenshotCloseButtonText}>إغلاق</Text>
+                       </TouchableOpacity>
+                      </View>
+                    </React.Fragment>
                   )}
                 </View>
               </View>
@@ -489,155 +500,187 @@ export default HomeScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    padding: 16,
+    backgroundColor: '#f5f5f5',
   },
   scrollContent: {
-    paddingBottom: 32,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+    paddingTop: 40,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 6,
     textAlign: 'center',
-    marginVertical: 16,
   },
   underline: {
     height: 2,
-    backgroundColor: '#000',
-    marginBottom: 16,
-    width: '60%',
+    backgroundColor: '#007AFF',
+    width: '78%',
     alignSelf: 'center',
+    marginBottom: 24,
   },
   card: {
-    backgroundColor: '#f1f1f1',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 16,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 24,
+    borderColor: '#ccc',
+    borderWidth: 1,
     elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
   },
   icon: {
-    fontSize: 24,
-    marginRight: 8,
-    color: '#000',
+    fontSize: 28,
+    color: 'black',
+    marginRight: 10,
   },
   cardTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#000',
+    color: 'black',
   },
   actionButton: {
     backgroundColor: '#000',
-    paddingVertical: 12,
     borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: 'center',
     marginTop: 10,
   },
   actionButtonText: {
     color: '#fff',
+    fontWeight: 'bold',
     fontSize: 16,
-    textAlign: 'center',
   },
   modalContainer: {
     flex: 1,
-    padding: 16,
     backgroundColor: '#fff',
+    padding: 20,
+    alignItems: 'center',
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 16,
+    color: '#333',
+    marginVertical: 15,
   },
   imageScroll: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   imageFrame: {
-    width: '48%',
-    height: 150,
-    marginBottom: 12,
-    borderRadius: 10,
+    width: screenWidth - 40,
+    height: 250,
+    marginBottom: 18,
+    borderRadius: 20,
     overflow: 'hidden',
   },
   imageStyle: {
     width: '100%',
     height: '100%',
-    borderRadius: 10,
   },
   closeButton: {
     backgroundColor: '#000',
+    borderRadius: 12,
     paddingVertical: 12,
-    borderRadius: 10,
-    marginTop: 20,
+    paddingHorizontal: 35,
+    marginTop: 15,
+    elevation: 4,
   },
   closeButtonText: {
     color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
     textAlign: 'center',
-    fontSize: 16,
   },
-  fullScreenCloseButton: {
-    position: 'absolute',
-    top: 40,
-    right: 20,
-    zIndex: 99,
+  screenshotCloseButton: {
+    backgroundColor: '#000',
+    borderRadius: 20,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    marginTop: 12,
+    borderWidth: 2,
+    borderColor: '#000',
+    width: '100%',
+    alignSelf: 'center',
+    elevation: 4,
+  },
+  screenshotCloseButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   infoText: {
-    fontSize: 16,
+    fontSize: 20,
+    lineHeight: 24,
     color: '#333',
-    lineHeight: 26,
-    marginBottom: 24,
-    paddingHorizontal: 10,
+    textAlign: 'center',
+    fontWeight: 'bold',
   },
   contactRow: {
     flexDirection: 'row',
+    marginTop: 20,
     alignItems: 'center',
-    marginBottom: 20,
   },
   phoneButton: {
-    backgroundColor: '#000',
+    backgroundColor: '#007AFF',
     padding: 12,
-    borderRadius: 50,
-    marginRight: 12,
+    borderRadius: 30,
+    marginRight: 10,
   },
   contactText: {
-    fontSize: 16,
-    color: '#000',
+    fontSize: 20,
+    color: '#555',
+    fontWeight: 'bold',
   },
   separator: {
     height: 2,
-    backgroundColor: '#000',
-    marginVertical: 16,
+    backgroundColor: '#007AFF',
+    marginVertical: 15,
+    width: '90%',
+    alignSelf: 'center',
   },
   blueButton: {
     backgroundColor: '#000',
+    marginHorizontal: 30,
+    borderRadius: 14,
     paddingVertical: 14,
-    borderRadius: 10,
-    marginVertical: 8,
+    marginTop: 20,
+    elevation: 4,
+    width: '90%',
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   buttonText: {
     color: '#fff',
-    textAlign: 'center',
     fontSize: 18,
     fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  buttonIcon: {
+    marginRight: 10,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: '#00000099',
     justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 30,
   },
   modalBox: {
-    width: '100%',
     backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 20,
-    alignItems: 'center',
+    borderRadius: 20,
+    padding: 25,
   },
   // Reservation-specific modal styles
   reservationModalBox: {
@@ -661,17 +704,32 @@ const styles = StyleSheet.create({
     marginBottom: 14,
     textAlign: 'center',
   },
+  hourTitleRed: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#D32F2F',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  blackUnderline: {
+    height: 2,
+    backgroundColor: '#000',
+    width: '80%',
+    alignSelf: 'center',
+    marginBottom: 12,
+  },
   primaryButton: {
     marginTop: 15,
     backgroundColor: '#000',
-    paddingVertical: 14,
-    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 24,
     width: '100%',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 4,
+    shadowRadius: 6,
+    elevation: 5,
   },
   primaryButtonText: {
     color: '#fff',
@@ -682,10 +740,11 @@ const styles = StyleSheet.create({
   outlineButton: {
     marginTop: 12,
     backgroundColor: '#fff',
-    paddingVertical: 12,
-    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 24,
     width: '100%',
-    borderWidth: 1.5,
+    borderWidth: 2,
     borderColor: '#000',
     elevation: 0,
   },
@@ -694,6 +753,27 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  // Optional: use these for list-like reservation options (e.g., "حجز موعد جديد", "الحجز الحالي")
+  reservationOptionButton: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderColor: '#000',
+    borderWidth: 2,
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    marginVertical: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  reservationOptionText: {
+    color: '#111',
+    fontSize: 16,
+    fontWeight: '700',
+    textAlign: 'left',
+    flex: 1,
   },
   hourButton: {
     backgroundColor: '#000',
@@ -707,6 +787,29 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     textAlign: 'center',
+  },
+  hourOptionRow: {
+    width: '100%',
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    marginVertical: 2,
+    alignItems: 'flex-start',
+  },
+  hourOptionText: {
+    color: '#666',
+    fontSize: 16,
+    textAlign: 'left',
+    width: '100%',
+  },
+  hourOptionUnderline: {
+    height: 2,
+    width: '70%',
+    maxWidth: 140,
+    backgroundColor: '#000',
+    alignSelf: 'flex-start',
+    marginTop: 4,
+    marginBottom: 6,
+    borderRadius: 1,
   },
   cancelButton: {
     marginTop: 16,
@@ -734,5 +837,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#000',
     marginBottom: 6,
+  },
+  screenshotNote: {
+    marginTop: 6,
+    marginBottom: 4,
+    color: '#D32F2F',
+    fontSize: 14,
+    textAlign: 'center',
+    fontWeight: '700',
+    backgroundColor: '#FFF3F3',
+    borderWidth: 1,
+    borderColor: '#F5C2C7',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    width: '100%',
   },
 });
