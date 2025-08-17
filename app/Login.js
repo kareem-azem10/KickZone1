@@ -1,7 +1,7 @@
-import React, { useRef, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
 import { getAuth, signInWithPhoneNumber } from 'firebase/auth';
+import React, { useRef, useState } from 'react';
+import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { app, firebaseConfig } from '../Confige';
 
 export default function Login() {
@@ -14,13 +14,16 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   const sendCode = async () => {
-    if (!phoneNumber.startsWith('+')) {
-      Alert.alert('تنبيه', 'الرجاء إدخال الرقم مع رمز الدولة، مثال: +972...');
-      return;
+    let fullNumber = phoneNumber.trim();
+
+    // إضافة كود الدولة +972 إذا ما كان موجود
+    if (!fullNumber.startsWith('+')) {
+      fullNumber = '+972' + fullNumber.replace(/^0+/, '');
     }
+
     try {
       setLoading(true);
-      const conf = await signInWithPhoneNumber(auth, phoneNumber, recaptchaRef.current);
+      const conf = await signInWithPhoneNumber(auth, fullNumber, recaptchaRef.current);
       setConfirmation(conf);
       Alert.alert('تم الإرسال', 'تم إرسال رمز عبر الرسائل القصيرة');
     } catch (e) {
@@ -60,7 +63,7 @@ export default function Login() {
           <>
             <TextInput
               style={styles.input}
-              placeholder="مثال: +9725XXXXXXXX"
+              placeholder="مثال: 059XXXXXXX"
               placeholderTextColor="#888"
               keyboardType="phone-pad"
               value={phoneNumber}

@@ -1,6 +1,9 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { initializeApp } from 'firebase/app';
+import { getReactNativePersistence, initializeAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
+// إعدادات Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDy_NAW5EnKqsAXnqmbnBFU0YUf2JB-8Ts",
   authDomain: "kickzone-bff5c.firebaseapp.com",
@@ -11,9 +14,15 @@ const firebaseConfig = {
   measurementId: "G-HK0PNV62SY"
 };
 
-// Initialize Firebase app
+// تهيئة التطبيق
 const app = initializeApp(firebaseConfig);
 
-// Export Firestore instance
-export const db = getFirestore(app);
-export { app, firebaseConfig };
+// تهيئة Auth مع تخزين الجلسة
+const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage)
+});
+
+// Firestore
+const db = getFirestore(app);
+
+export { app, auth, db, firebaseConfig };
